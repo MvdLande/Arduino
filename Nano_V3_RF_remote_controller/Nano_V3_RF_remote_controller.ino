@@ -45,7 +45,7 @@
 //
 
 #include <Wire.h>
-#include <LiquidCrystal_I2C.h>
+#include <LiquidCrystal_I2C.h> /* from Library "LiquidCrystal_I2C-1.1.2" */
 
 LiquidCrystal_I2C lcd(0x20,20,4);  // set the PCF8574 I2C address to 0x20 display = 20 chars and 4 lines (2004A)
 
