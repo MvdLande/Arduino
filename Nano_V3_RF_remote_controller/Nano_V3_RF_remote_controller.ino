@@ -46,6 +46,30 @@
 
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h> /* from Library "LiquidCrystal_I2C-1.1.2" */
+#include <SPI.h>
+#include "printf.h"
+#include "RF24.h" /* See documentation at https://nRF24.github.io/RF24 */
+
+#define CE_PIN 7
+#define CSN_PIN 8
+// instantiate an object for the nRF24L01 transceiver
+RF24 radio(CE_PIN, CSN_PIN);
+// Let these addresses be used for the pair
+uint8_t address[][6] = { "1Node", "2Node" };
+// It is very helpful to think of an address as a path instead of as
+// an identifying device destination
+
+// to use different addresses on a pair of radios, we need a variable to
+// uniquely identify which address this radio will use to transmit
+bool radioNumber = 1;  // 0 uses address[0] to transmit, 1 uses address[1] to transmit
+
+// Used to control whether this node is sending or receiving
+bool role = false;  // true = TX role, false = RX role
+
+// For this example, we'll be using a payload containing
+// a single float number that will be incremented
+// on every successful transmission
+float payload = 0.0;
 
 LiquidCrystal_I2C lcd(0x20,20,4);  // set the PCF8574 I2C address to 0x20 display = 20 chars and 4 lines (2004A)
 
@@ -59,18 +83,22 @@ void setup() {
 
   Serial.begin(9600);
   while (!Serial); // Leonardo: wait for Serial Monitor
-  Serial.println("\nI2C Scanner");
+  //Serial.println("\nRF controller");
+
   lcd.init();                      // initialize the lcd 
-  // Print a message to the LCD.
+  // turn the backlight on.
   lcd.backlight();
-  lcd.setCursor(3,LCD_LINE1); 
-  lcd.print("Hello, world!");
-  lcd.setCursor(2,LCD_LINE2);
-  lcd.print("Arduino UNO Nano!");
-   lcd.setCursor(1,LCD_LINE3);
-  lcd.print("PCF8574 to HD44780");
-   lcd.setCursor(1,LCD_LINE4);
-  lcd.print("Powered By Arduino!");
+  // Print a message to the LCD.
+  lcd.setCursor(0,LCD_LINE1); 
+  lcd.print("nRF24 intializing...");
+    // initialize the transceiver on the SPI bus
+  if (!radio.begin()) {
+    //Serial.println(F("radio hardware is not responding!!"));
+    lcd.setCursor(0,LCD_LINE1); 
+    lcd.print("nRF24 not responding");
+    while (1) {}  // hold in infinite loop
+    // add some error handling!
+  }
 }
 
 void loop() {
