@@ -55,7 +55,7 @@
 // instantiate an object for the nRF24L01 transceiver
 RF24 radio(CE_PIN, CSN_PIN);
 // Let these addresses be used for the pair
-uint8_t address[][6] = { "1Node", "2Node" };
+uint8_t address[][6] = { "Node1", "Node2" }; // 5 bytes max
 // It is very helpful to think of an address as a path instead of as
 // an identifying device destination
 
@@ -77,6 +77,7 @@ LiquidCrystal_I2C lcd(0x20,20,4);  // set the PCF8574 I2C address to 0x20 displa
 # define LCD_LINE2 1
 # define LCD_LINE3 2
 # define LCD_LINE4 3
+# define LCD_CHARACTER1 0 % first character 
 
 void setup() {
   Wire.begin();
@@ -89,12 +90,12 @@ void setup() {
   // turn the backlight on.
   lcd.backlight();
   // Print a message to the LCD.
-  lcd.setCursor(0,LCD_LINE1); 
+  lcd.setCursor(LCD_CHARACTER1,LCD_LINE1); 
   lcd.print("nRF24 intializing...");
     // initialize the transceiver on the SPI bus
   if (!radio.begin()) {
     //Serial.println(F("radio hardware is not responding!!"));
-    lcd.setCursor(0,LCD_LINE1); 
+    lcd.setCursor(LCD_CHARACTER1,LCD_LINE1); 
     lcd.print("nRF24 not responding");
     while (1) {}  // hold in infinite loop
     // add some error handling!
@@ -102,38 +103,6 @@ void setup() {
 }
 
 void loop() {
-  int nDevices = 0;
-
-  Serial.println("Scanning...");
-
-  for (byte address = 1; address < 127; ++address) {
-    // The i2c_scanner uses the return value of
-    // the Wire.endTransmission to see if
-    // a device did acknowledge to the address.
-    Wire.beginTransmission(address);
-    byte error = Wire.endTransmission();
-
-    if (error == 0) {
-      Serial.print("I2C device found at address 0x");
-      if (address < 16) {
-        Serial.print("0");
-      }
-      Serial.print(address, HEX);
-      Serial.println("  !");
-
-      ++nDevices;
-    } else if (error == 4) {
-      Serial.print("Unknown error at address 0x");
-      if (address < 16) {
-        Serial.print("0");
-      }
-      Serial.println(address, HEX);
-    }
-  }
-  if (nDevices == 0) {
-    Serial.println("No I2C devices found\n");
-  } else {
-    Serial.println("done\n");
-  }
-  delay(5000); // Wait 5 seconds for next scan
+  uint8_t ADC_VAL[4];
+  
 }
